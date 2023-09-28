@@ -16,8 +16,7 @@ validate_env_var() {
     fi
 }
 
-validate_env_var "RELAY_A"
-validate_env_var "RELAY_B"
+validate_env_var "RELAYS"
 validate_env_var "ALLOWED_EVENTS"
 
 FILTER="{\"kinds\":${ALLOWED_EVENTS}}"
@@ -32,11 +31,23 @@ sync_with_relay() {
     log "Completed sync with ${relay}"
 }
 
+parse_and_sync_relays() {
+    local cleaned_relays=${RELAYS//\[/}
+    cleaned_relays=${cleaned_relays//\]/}
+
+    IFS=',' read -ra ADDR <<< "$cleaned_relays"
+
+    for i in "${ADDR[@]}"; do
+        # Trim leading and trailing whitespace
+        relay=$(echo "$i" | xargs)
+        sync_with_relay "$relay"
+    done
+}
+
 if [[ ! -x "./strfry" ]]; then
     log "strfry is either missing or not executable. Exiting."
     exit 1
 fi
 
 # Perform sync
-sync_with_relay "$RELAY_A"
-sync_with_relay "$RELAY_B"
+parse_and_sync_relays
