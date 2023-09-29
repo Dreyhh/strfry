@@ -39,10 +39,5 @@ COPY --from=build /build/whitelist.js whitelist.js
 COPY --from=build /build/strfry strfry
 COPY --from=build /build/backup_script.sh backup_script.sh
 COPY --from=build /build/sync_script.sh sync_script.sh
-COPY --from=build /build/init_cronjobs.sh init_cronjobs.sh
-COPY --from=build /build/load_envs.sh load_envs.sh
-COPY --from=build /build/entrypoint.sh entrypoint.sh
 
 RUN chmod +x *.sh whitelist.js
-
-ENTRYPOINT ["/app/entrypoint.sh"]
