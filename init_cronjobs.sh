@@ -26,7 +26,7 @@ set_cron_job() {
     sed -i "\#$command#d" "$temp_cron"
 
     # Append the new job to the temp file
-    echo "$schedule $command >> $log_file 2>&1" >> "$temp_cron"
+    echo "$schedule BASH_ENV=/app/load_envs.sh $command >> $log_file 2>&1" >> "$temp_cron"
 
     # Install the new cron jobs
     crontab "$temp_cron"
