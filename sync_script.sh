@@ -19,15 +19,50 @@ validate_env_var() {
 validate_env_var "RELAYS"
 validate_env_var "ALLOWED_EVENTS"
 
+parse_pubkey_string() {
+  input_str="$1"
+
+  input_str="${input_str#[}"
+  input_str="${input_str%]}"
+
+  declare -a parsed_array=()
+
+  IFS=',' read -ra ADDR <<< "$input_str"
+  for i in "${ADDR[@]}"; do
+    # Trim leading and trailing whitespace and quotes
+    trimmed=$(echo "$i" | xargs)
+
+    # Add escaped quotes around the pubkey
+    quoted="\"$trimmed\""
+
+    parsed_array+=("$quoted")
+  done
+
+  parsed_str=$(IFS=,; echo "${parsed_array[*]}")
+
+  # Add leading and trailing square brackets
+  parsed_str="[$parsed_str]"
+
+  echo "$parsed_str"
+}
+
 FILTER="{\"kinds\":${ALLOWED_EVENTS}}"
 
 sync_with_relay() {
     local relay=$1
     log "Started sync with ${relay}"
-    ./strfry sync "${relay}" --filter "${FILTER}" || {
+    ./strfry sync "${relay}" --filter=$FILTER  || {
         log "Sync with ${relay} failed. Exiting."
         exit 1
     }
+    if [[ ! -z "$WHITELIST_PUBKEYS" ]]; then
+        parsed_pubkeys=$(parse_pubkey_string "$WHITELIST_PUBKEYS")
+        log "Started sync whitelist pubkeys events."
+        ./strfry sync "${relay}" --filter="{\"authors\":${parsed_pubkeys}}" || {
+            log "Sync of whitelist pubkeys events failed. Exiting."
+            exit 1
+        }
+    fi
     log "Completed sync with ${relay}"
 }
 

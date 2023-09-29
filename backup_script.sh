@@ -32,7 +32,7 @@ touch "$LOG_FILE"
     exit 1
 }
 
-[[ ! -f "$POD_NAME" ]] && {
+[[ -z "$POD_NAME" ]] && {
     log "POD_NAME not set. Exiting."
     exit 1
 }
