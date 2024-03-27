@@ -24,17 +24,18 @@ WORKDIR /app
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-    ca-certificates liblmdb0 libflatbuffers1 libsecp256k1-0 libb2-1 libzstd1 curl unzip cron lsb-release && \
+    ca-certificates liblmdb0 libflatbuffers1 libsecp256k1-0 libb2-1 libzstd1 curl unzip cron lsb-release gnupg && \
     rm -rf /var/lib/apt/lists/* && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt update && \
     apt install -y nodejs && \
     rm -rf /var/lib/apt/lists/* && \
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
-    unzip awscliv2.zip && \
-    ./aws/install && \
-    rm -rf awscliv2.zip aws && \
-    npm install redis 
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
+    apt update && \
+    apt install -y google-cloud-sdk && \
+    rm -rf /var/lib/apt/lists/* && \
+    npm install redis
  
 COPY --from=build /build/redisClient.js redisClient.js
 COPY --from=build /build/whitelist.js whitelist.js

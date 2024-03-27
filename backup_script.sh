@@ -7,8 +7,9 @@ log() {
     echo "$(date +"%Y-%m-%d %H:%M:%S") - $1"
 }
 
-if ! command -v /usr/local/bin/aws &> /dev/null; then
-    log "AWS CLI is not installed. Exiting."
+# Check if gcloud and gsutil are installed
+if ! command -v gcloud &> /dev/null || ! command -v gsutil &> /dev/null; then
+    log "Google Cloud SDK or gsutil is not installed. Exiting."
     exit 1
 fi
 
@@ -23,7 +24,6 @@ cd /app
 
 FILE_NAME="backup${currentdate}.jsonl"
 LATEST_BACKUP="backup_latest.jsonl"
-
 
 [[ -z "$BUCKET_NAME" ]] && {
     log "Bucket name is empty. Exiting."
@@ -44,8 +44,8 @@ if [[ -f "$LATEST_BACKUP" ]]; then
     fi
 fi
 
-# Upload the file to the S3 bucket if different or if latest backup doesn't exist
-if /usr/local/bin/aws s3 cp "$FILE_NAME" "s3://${BUCKET_NAME}/${POD_NAME}/${POD_NAME}${FILE_NAME}" ; then
+# Upload the file to the GCS bucket if different or if latest backup doesn't exist
+if gsutil cp "$FILE_NAME" "gs://${BUCKET_NAME}/${POD_NAME}/${POD_NAME}_${FILE_NAME}" ; then
     log "File ${FILE_NAME} has been successfully uploaded to ${BUCKET_NAME}."
 
     # Update latest backup and remove the original file
