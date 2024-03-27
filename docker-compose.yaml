@@ -2,10 +2,14 @@ version: '3'
 
 services:
   strfry-nostr-relay:
+    # command: ["/app/strfry", "relay"]
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
+      # - /home/armando/Desktop/strfry/strfry.conf:/etc/strfry.conf
+      # - /home/armando/Desktop/strfry/strfry-db/:/app/strfry-db
+      # - /home/armando/Desktop/strfry/whitelist.js:/app/whitelist.js
       - /home/ubuntu/strfry/strfry.conf:/etc/strfry.conf
       - /home/ubuntu/strfry/strfry-db/:/app/strfry-db
     ports:

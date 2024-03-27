@@ -24,17 +24,19 @@ WORKDIR /app
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-    liblmdb0 libflatbuffers1 libsecp256k1-0 libb2-1 libzstd1 curl unzip cron && \
+    ca-certificates liblmdb0 libflatbuffers1 libsecp256k1-0 libb2-1 libzstd1 curl unzip cron lsb-release && \
     rm -rf /var/lib/apt/lists/* && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt update && \
-    apt-get install -y nodejs && \
+    apt install -y nodejs && \
     rm -rf /var/lib/apt/lists/* && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install && \
-    rm -rf awscliv2.zip aws
-
+    rm -rf awscliv2.zip aws && \
+    npm install redis 
+ 
+COPY --from=build /build/redisClient.js redisClient.js
 COPY --from=build /build/whitelist.js whitelist.js
 COPY --from=build /build/strfry strfry
 COPY --from=build /build/backup_script.sh backup_script.sh
